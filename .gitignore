@@ -1,0 +1,9 @@
+#Ignore output directories
+/Debug
+/Release
+
+#Ignore some VS generated directories
+/.vs
+
+#Ignore some VS generated files
+*.user

@@ -19,19 +19,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\HttpQueriesParser.h" />
-    <ClInclude Include="include\ParsedHttpQuery.h" />
+    <ClInclude Include="include\HttpRequestsParser.h" />
+    <ClInclude Include="include\ParsedHttpRequest.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\HttpQueriesParser.cpp" />
+    <ClCompile Include="src\HttpRequestsParser.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{f19623cc-84b1-4a1d-93d2-8c634b4e20c0}</ProjectGuid>
-    <RootNamespace>HttpQueriesParser</RootNamespace>
+    <RootNamespace>HttpRequestsParser</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>HttpRequestsParser</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

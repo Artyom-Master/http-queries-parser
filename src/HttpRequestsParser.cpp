@@ -8,6 +8,11 @@ HttpRequestsParser::HttpRequestsParser() noexcept
 
 }
 
+HttpRequestsParser::~HttpRequestsParser()
+{
+	clear();
+}
+
 
 HttpRequestsParser::HttpRequestsParser(HttpRequestsParser&& other) noexcept
 	: m_rawHttpRequest{ std::move(other.m_rawHttpRequest) }
@@ -58,7 +63,7 @@ std::string_view HttpRequestsParser::getValueOfHeader(std::string&& keyOfHeaderO
 		std::string keyToSearch{ std::move(keyOfHeaderOfRequest) };
 
 		for (int index{ 0 }; index < keyToSearch.size(); ++index)
-			keyToSearch[index] = lowCharacterCaseInRequest(keyToSearch.at(index));
+			keyToSearch[index] = lowerCharacterCaseInRequest(keyToSearch.at(index));
 
 		if (m_parsedHttpRequest.requestHeaders.find(keyToSearch)
 			!= m_parsedHttpRequest.requestHeaders.end())
@@ -68,10 +73,22 @@ std::string_view HttpRequestsParser::getValueOfHeader(std::string&& keyOfHeaderO
 	return EMPTY_STRING;
 }
 
+std::unordered_map<std::string_view, std::string_view>::iterator 
+HttpRequestsParser::beginOfHeaders()
+{
+	return m_parsedHttpRequest.requestHeaders.begin();
+}
+
+std::unordered_map<std::string_view, std::string_view>::iterator 
+HttpRequestsParser::endOfHeaders()
+{
+	return m_parsedHttpRequest.requestHeaders.end();
+}
+
 
 bool HttpRequestsParser::parse(std::string&& httpRequest)
 {
-	bool isSuccessfullyParsed{ false };
+	clear();
 
 	if (httpRequest.size() > 1)
 	{
@@ -86,7 +103,7 @@ bool HttpRequestsParser::parse(std::string&& httpRequest)
 			if (!isValidCharacter(m_rawHttpRequest.at(endOfCheckedSubstring)))
 			{
 				m_parsingState = ParsingState::notParsed;
-				return isSuccessfullyParsed;
+				return false;
 			}
 
 			switch (m_parsingState)
@@ -97,7 +114,7 @@ bool HttpRequestsParser::parse(std::string&& httpRequest)
 				if (isControlCharacter(m_rawHttpRequest.at(endOfCheckedSubstring)))
 				{
 					m_parsingState = ParsingState::notParsed;
-					return isSuccessfullyParsed;
+					return false;
 				}
 
 				if (m_rawHttpRequest.at(endOfCheckedSubstring) == WHITESPACE)
@@ -109,7 +126,7 @@ bool HttpRequestsParser::parse(std::string&& httpRequest)
 						== KNOWN_HTTP_METHODS.end())
 					{
 						m_parsingState = ParsingState::notParsed;
-						return isSuccessfullyParsed;
+						return false;
 					}
 
 					m_parsedHttpRequest.httpMethod = KNOWN_HTTP_METHODS.at(assumedHttpMethod);
@@ -126,7 +143,7 @@ bool HttpRequestsParser::parse(std::string&& httpRequest)
 				if (isControlCharacter(m_rawHttpRequest.at(endOfCheckedSubstring)))
 				{
 					m_parsingState = ParsingState::notParsed;
-					return isSuccessfullyParsed;
+					return false;
 				}
 
 				if (m_rawHttpRequest.at(endOfCheckedSubstring) == WHITESPACE)
@@ -155,7 +172,7 @@ bool HttpRequestsParser::parse(std::string&& httpRequest)
 				else if (isControlCharacter(m_rawHttpRequest.at(endOfCheckedSubstring)))
 				{
 					m_parsingState = ParsingState::notParsed;
-					return isSuccessfullyParsed;
+					return false;
 				}
 				else
 					continue;
@@ -170,14 +187,14 @@ bool HttpRequestsParser::parse(std::string&& httpRequest)
 					while (m_rawHttpRequest.at(currentHeaderRequestPointer) != COLON)
 					{
 						if (currentHeaderRequestPointer == endOfCheckedSubstring
-							|| isSpecialCharacter(m_rawHttpRequest.at(currentHeaderRequestPointer)))
+							|| !isCharacterIsLetterOrHyphen(m_rawHttpRequest.at(currentHeaderRequestPointer)))
 						{
 							m_parsingState = ParsingState::notParsed;
-							return isSuccessfullyParsed;
+							return false;
 						}
 
 						m_rawHttpRequest[currentHeaderRequestPointer] =
-							lowCharacterCaseInRequest(m_rawHttpRequest.at(currentHeaderRequestPointer));
+							lowerCharacterCaseInRequest(m_rawHttpRequest.at(currentHeaderRequestPointer));
 
 						++currentHeaderRequestPointer;
 					}
@@ -188,11 +205,18 @@ bool HttpRequestsParser::parse(std::string&& httpRequest)
 
 					startOfCheckedSubstring = endOfCheckedSubstring + 2;
 					++endOfCheckedSubstring;
+
+					if (endOfCheckedSubstring + 2 < m_rawHttpRequest.size()
+						&& checkEndOfLineInRequest(endOfCheckedSubstring + 1))
+					{
+						m_parsingState = ParsingState::successfullyParsed;
+						return true;
+					}
 				}
 				else if (isControlCharacter(m_rawHttpRequest.at(endOfCheckedSubstring)))
 				{
 					m_parsingState = ParsingState::notParsed;
-					return isSuccessfullyParsed;
+					return false;
 				}
 				else
 					continue;
@@ -202,11 +226,21 @@ bool HttpRequestsParser::parse(std::string&& httpRequest)
 		}
 
 		m_parsingState = ParsingState::successfullyParsed;
-		isSuccessfullyParsed = true;
+		return true;
 	}
 
-	return isSuccessfullyParsed;
+	return false;
 }
+
+
+void HttpRequestsParser::clear()
+{
+	m_rawHttpRequest.clear();
+	m_rawHttpRequest.shrink_to_fit();
+	m_parsedHttpRequest.clear();
+	m_parsingState = ParsingState::notParsed;
+}
+
 
 std::string_view HttpRequestsParser::getSubstringOfRequest(size_t begin, size_t end)
 {
@@ -223,9 +257,9 @@ bool HttpRequestsParser::checkEndOfLineInRequest(size_t stringCharacterIndex)
 		return false;
 }
 
-char HttpRequestsParser::lowCharacterCaseInRequest(char character) {
-	if (character >= UPPER_A_CHARACTER
-		&& character <= UPPER_Z_CHARACTER)
+char HttpRequestsParser::lowerCharacterCaseInRequest(char character) {
+	if (character >= BOUNDARIES_OF_UPPER_CASE_LETTERS.first
+		&& character <= BOUNDARIES_OF_UPPER_CASE_LETTERS.second)
 		return character + UPPER_TO_LOWER_CASE_SHIFT;
 	else
 		return character;
@@ -246,18 +280,13 @@ bool HttpRequestsParser::isControlCharacter(char character)
 		|| character == BOUNDARY_CODES_OF_ASCII_TABLE.second;
 }
 
-bool HttpRequestsParser::isSpecialCharacter(char character)
+bool HttpRequestsParser::isCharacterIsLetterOrHyphen(char character)
 {
-	return (character >= FIRST_PART_OF_SPECIAL_CHARACTERS_OF_ASCII_TABLE.first 
-		&& character <= FIRST_PART_OF_SPECIAL_CHARACTERS_OF_ASCII_TABLE.second
-		&& character != HYPHEN)
+	return (character >= BOUNDARIES_OF_UPPER_CASE_LETTERS.first
+		&& character <= BOUNDARIES_OF_UPPER_CASE_LETTERS.second)
 
-		|| (character >= SECOND_PART_OF_SPECIAL_CHARACTERS_OF_ASCII_TABLE.first 
-			&& character <= SECOND_PART_OF_SPECIAL_CHARACTERS_OF_ASCII_TABLE.second)
-		
-		|| (character >= THIRD_PART_OF_SPECIAL_CHARACTERS_OF_ASCII_TABLE.first 
-			&& character <= THIRD_PART_OF_SPECIAL_CHARACTERS_OF_ASCII_TABLE.second)
-		
-		|| (character >= FOURTH_PART_OF_SPECIAL_CHARACTERS_OF_ASCII_TABLE.first 
-			&& character <= FOURTH_PART_OF_SPECIAL_CHARACTERS_OF_ASCII_TABLE.second);
+		|| (character >= BOUNDARIES_OF_LOWER_CASE_LETTERS.first
+			&& character <= BOUNDARIES_OF_LOWER_CASE_LETTERS.second)
+
+		|| character == HYPHEN;
 }

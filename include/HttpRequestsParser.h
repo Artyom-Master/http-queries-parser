@@ -20,7 +20,7 @@ class HttpRequestsParser
 
 public:
 	HttpRequestsParser() noexcept;
-	~HttpRequestsParser() = default;
+	~HttpRequestsParser();
 
 	HttpRequestsParser(const HttpRequestsParser& other) = delete;
 	HttpRequestsParser& operator=(const HttpRequestsParser& other) = delete;
@@ -33,16 +33,20 @@ public:
 	std::string_view getUrl();
 	std::string_view getValueOfHeader(std::string&& keyOfHeaderOfRequest);
 
+	std::unordered_map<std::string_view, std::string_view>::iterator beginOfHeaders();
+	std::unordered_map<std::string_view, std::string_view>::iterator endOfHeaders();
+
 	bool parse(std::string&& httpRequest);
 
 private:
+	void clear();
 	std::string_view getSubstringOfRequest(size_t begin, size_t end);
 
 	bool checkEndOfLineInRequest(size_t stringCharacterIndex);
-	char lowCharacterCaseInRequest(char character);
+	char lowerCharacterCaseInRequest(char character);
 
 	bool isValidCharacter(char character);
 	bool isControlCharacter(char character);
-	bool isSpecialCharacter(char character);
+	bool isCharacterIsLetterOrHyphen(char character);
 };
 

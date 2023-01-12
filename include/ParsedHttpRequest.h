@@ -28,12 +28,8 @@ namespace
 	constexpr std::string_view EMPTY_STRING{ "" };
 
 	constexpr std::pair<uint8_t, uint8_t> BOUNDARY_CODES_OF_ASCII_TABLE{ 0, 127 };
-	constexpr std::pair<uint8_t, uint8_t> FIRST_PART_OF_SPECIAL_CHARACTERS_OF_ASCII_TABLE{ 33, 47 };
-	constexpr std::pair<uint8_t, uint8_t> SECOND_PART_OF_SPECIAL_CHARACTERS_OF_ASCII_TABLE{ 58, 64 };
-	constexpr std::pair<uint8_t, uint8_t> THIRD_PART_OF_SPECIAL_CHARACTERS_OF_ASCII_TABLE{ 91, 96 };
-	constexpr std::pair<uint8_t, uint8_t> FOURTH_PART_OF_SPECIAL_CHARACTERS_OF_ASCII_TABLE{ 123, 126 };
-
-	constexpr uint8_t LAST_CONTROL_CHARACTER_OF_ASCII_TABLE{ 31 };
+	constexpr std::pair<uint8_t, uint8_t> BOUNDARIES_OF_UPPER_CASE_LETTERS{ 'A', 'Z' };
+	constexpr std::pair<uint8_t, uint8_t> BOUNDARIES_OF_LOWER_CASE_LETTERS{ 'a', 'z' };
 
 	constexpr uint8_t HYPHEN{ '-' };
 	constexpr uint8_t WHITESPACE{ ' ' };
@@ -41,8 +37,7 @@ namespace
 	constexpr uint8_t CARRIAGE_RETURN{ '\r' };
 	constexpr uint8_t LINE_FEED{ '\n' };
 
-	constexpr uint8_t UPPER_A_CHARACTER{ 'A' };
-	constexpr uint8_t UPPER_Z_CHARACTER{ 'Z' };
+	constexpr uint8_t LAST_CONTROL_CHARACTER_OF_ASCII_TABLE{ 31 };
 	constexpr uint8_t UPPER_TO_LOWER_CASE_SHIFT{ 32 };
 }
 
@@ -59,6 +54,8 @@ struct ParsedHttpRequest
 	{
 
 	}
+
+	~ParsedHttpRequest() = default;
 
 	ParsedHttpRequest(const ParsedHttpRequest& other) = delete;
 	ParsedHttpRequest& operator=(const ParsedHttpRequest& other) = delete;
@@ -78,5 +75,12 @@ struct ParsedHttpRequest
 		requestHeaders = std::move(other.requestHeaders);
 
 		return *this;
+	}
+
+	void clear()
+	{
+		httpMethod = HttpMethods::unknown;
+		url = EMPTY_STRING;
+		requestHeaders.clear();
 	}
 };

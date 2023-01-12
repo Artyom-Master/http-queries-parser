@@ -16,9 +16,9 @@ The process of parsing consists of next steps:
 
 If during substring of request validation it doesn't meet the certain requirements above, parsing is being stopped and nothing meaningful can be gotten from parser after that. Otherwise after successfull parsing there are some functions to receive useful information about parsed HTTP request:
 
-- HTTP method of request (get, post, put, connect or head) by **HttpMethods HttpRequestsParser::getHttpMethod()**;
-- URL of request by **std::string_view HttpRequestsParser::getUrl()**;
-- value by its name (case insensitive) in header by **std::string_view HttpRequestsParser::getValueOfHeader(std::string&& keyOfHeaderOfRequest)**;
+- HTTP method of request (get, post, put, connect or head) by **HttpMethods HttpRequestsParser::getHttpMethod()** *method*;
+- URL of request by **std::string_view HttpRequestsParser::getUrl()** *method*;
+- value by its name (case insensitive) in header by **std::string_view HttpRequestsParser::getValueOfHeader(std::string&& keyOfHeaderOfRequest)** *method*;
 
 Also it can be iterated over parsed request headers by the next way:
 ```
@@ -26,6 +26,7 @@ Also it can be iterated over parsed request headers by the next way:
         iterator != httpRequestsParser->endOfHeaders(); ++iterator)
         std::cout << iterator->first << ": " << iterator->second << "\n";
 ```
-To know if request parsed successfully **bool HttpRequestsParser::isRequestSuccessfullyParsed()** should be called.<br>
+To know if request parsed successfully then **bool HttpRequestsParser::isRequestSuccessfullyParsed()** *method* should be called.<br>
+The parser doesn't recognize HTTP version and data after headers and doesn't provide the way to know it.<br>
 Test example how to use parser is given in *main.cpp*.<br><br>
 Visual Studio 2019 and MSVC v142 were used for project building.

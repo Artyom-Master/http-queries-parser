@@ -4,42 +4,41 @@
 
 void printParsedHttpRequest(const std::unique_ptr<HttpRequestsParser>& httpQueriesParser)
 {
-    std::cout << "Type of HTTP query: ";
+    std::cout << "HTTP method of request: ";
 
-    switch (httpQueriesParser->getRequestType())
+    switch (httpQueriesParser->getHttpMethod())
     {
-    case HttpRequestType::get:
+    case HttpMethods::get:
     {
         std::cout << "GET\n";
     }break;
-    case HttpRequestType::put:
+    case HttpMethods::put:
     {
         std::cout << "PUT\n";
     }break;
-    case HttpRequestType::connect:
+    case HttpMethods::connect:
     {
         std::cout << "CONNECT\n";
     }break;
-    case HttpRequestType::head:
+    case HttpMethods::head:
     {
         std::cout << "HEAD\n";
     }break;
-    case HttpRequestType::post:
+    case HttpMethods::post:
     {
         std::cout << "POST\n";
     }break;
-    case HttpRequestType::unknown:
+    case HttpMethods::unknown:
     {
         std::cout << "UNKNOWN\n";
     }break;
     }
 
-    std::cout << "URL: " << httpQueriesParser->getRequestUrl() << "\n";
-    std::cout << "HTTP version: " << httpQueriesParser->getHttpVersion() << "\n";
-    std::cout << "Host: " << httpQueriesParser->getValueOfHeaderOfRequest("Host") << "\n";
-    std::cout << "User-Agent: " << httpQueriesParser->getValueOfHeaderOfRequest("User-Agent") << "\n";
-    std::cout << "Accept: " << httpQueriesParser->getValueOfHeaderOfRequest("Accept") << "\n";
-    std::cout << "Connection: " << httpQueriesParser->getValueOfHeaderOfRequest("Connection") << "\n";
+    std::cout << "URL: " << httpQueriesParser->getUrl() << "\n";
+    std::cout << "Host: " << httpQueriesParser->getValueOfHeader("Host") << "\n";
+    std::cout << "User-Agent: " << httpQueriesParser->getValueOfHeader("User-Agent") << "\n";
+    std::cout << "Accept: " << httpQueriesParser->getValueOfHeader("Accept") << "\n";
+    std::cout << "Connection: " << httpQueriesParser->getValueOfHeader("Connection") << "\n";
     std::cout << "\n";
 }
 

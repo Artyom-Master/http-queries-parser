@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 
-enum class HttpRequestType : uint8_t
+enum class HttpMethods : uint8_t
 {
 	unknown,
 	get,
@@ -14,17 +14,43 @@ enum class HttpRequestType : uint8_t
 	head,
 };
 
+namespace
+{
+	const std::unordered_map<std::string_view, HttpMethods> KNOWN_HTTP_METHODS{
+	  {"GET", HttpMethods::get}
+	, {"POST", HttpMethods::post}
+	, {"CONNECT", HttpMethods::connect}
+	, {"PUT", HttpMethods::put}
+	, {"HEAD", HttpMethods::head}
+	};
+
+	constexpr char STRING_END{ '\0' };
+	constexpr std::string_view EMPTY_STRING{ "" };
+
+	constexpr std::pair<uint8_t, uint8_t> BOUNDARY_CODES_OF_ASCII_TABLE{ 0, 127 };
+	constexpr std::pair<uint8_t, uint8_t> FIRST_PART_OF_SPECIAL_CHARACTERS_OF_ASCII_TABLE{ 33, 47 };
+	constexpr std::pair<uint8_t, uint8_t> SECOND_PART_OF_SPECIAL_CHARACTERS_OF_ASCII_TABLE{ 58, 64 };
+	constexpr std::pair<uint8_t, uint8_t> THIRD_PART_OF_SPECIAL_CHARACTERS_OF_ASCII_TABLE{ 91, 96 };
+	constexpr std::pair<uint8_t, uint8_t> FOURTH_PART_OF_SPECIAL_CHARACTERS_OF_ASCII_TABLE{ 123, 126 };
+
+	constexpr uint8_t LAST_CONTROL_CHARACTER_OF_ASCII_TABLE{ 31 };
+
+	constexpr uint8_t HYPHEN{ '-' };
+	constexpr uint8_t WHITESPACE{ ' ' };
+	constexpr uint8_t COLON{ ':' };
+	constexpr uint8_t CARRIAGE_RETURN{ '\r' };
+	constexpr uint8_t LINE_FEED{ '\n' };
+}
+
 struct ParsedHttpRequest
 {
-	HttpRequestType type;
+	HttpMethods httpMethod;
 	std::string_view url;
-	std::string_view httpVersion;
 	std::unordered_map<std::string_view, std::string_view> requestHeaders;
 
 	ParsedHttpRequest() noexcept
-		: type{ HttpRequestType::unknown }
-		, url{ "" }
-		, httpVersion{ "" }
+		: httpMethod{ HttpMethods::unknown }
+		, url{ EMPTY_STRING }
 		, requestHeaders{}
 	{
 
@@ -34,9 +60,8 @@ struct ParsedHttpRequest
 	ParsedHttpRequest& operator=(const ParsedHttpRequest& other) = delete;
 
 	ParsedHttpRequest(ParsedHttpRequest&& other) noexcept
-		: type{ std::exchange(other.type, HttpRequestType::unknown) }
-		, url{ std::exchange(other.url, "") }
-		, httpVersion{ std::exchange(other.httpVersion, "") }
+		: httpMethod{ std::exchange(other.httpMethod, HttpMethods::unknown) }
+		, url{ std::exchange(other.url, EMPTY_STRING) }
 		, requestHeaders{ std::move(other.requestHeaders) }
 	{
 
@@ -44,9 +69,8 @@ struct ParsedHttpRequest
 
 	ParsedHttpRequest& operator=(ParsedHttpRequest&& other) noexcept
 	{
-		type = std::exchange(other.type, HttpRequestType::unknown);
-		url = std::exchange(other.url, "");
-		httpVersion = std::exchange(other.httpVersion, "");
+		httpMethod = std::exchange(other.httpMethod, HttpMethods::unknown);
+		url = std::exchange(other.url, EMPTY_STRING);
 		requestHeaders = std::move(other.requestHeaders);
 
 		return *this;

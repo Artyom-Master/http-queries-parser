@@ -1,14 +1,7 @@
 #include "HttpRequestsParser.h"
 
 HttpRequestsParser::HttpRequestsParser() noexcept
-	: m_knownHttpRequestTypes{ 
-	  {"GET", HttpRequestType::get}
-	, {"POST", HttpRequestType::post}
-	, {"CONNECT", HttpRequestType::connect}
-	, {"PUT", HttpRequestType::put}
-	, {"HEAD", HttpRequestType::head}
-	}
-	, m_rawHttpRequest{}
+	: m_rawHttpRequest{}
 	, m_parsedHttpRequest{}
 	, m_parsingState{ ParsingState::notParsed }
 {
@@ -42,15 +35,15 @@ bool HttpRequestsParser::isRequestSuccessfullyParsed()
 		return false;
 }
 
-HttpRequestType HttpRequestsParser::getRequestType()
+HttpMethods HttpRequestsParser::getHttpMethod()
 {
 	if (isRequestSuccessfullyParsed())
-		return m_parsedHttpRequest.type;
+		return m_parsedHttpRequest.httpMethod;
 	else
-		return HttpRequestType::unknown;
+		return HttpMethods::unknown;
 }
 
-std::string_view HttpRequestsParser::getRequestUrl()
+std::string_view HttpRequestsParser::getUrl()
 {
 	if (isRequestSuccessfullyParsed())
 		return m_parsedHttpRequest.url;
@@ -58,15 +51,7 @@ std::string_view HttpRequestsParser::getRequestUrl()
 		return EMPTY_STRING;
 }
 
-std::string_view HttpRequestsParser::getHttpVersion()
-{
-	if (isRequestSuccessfullyParsed())
-		return m_parsedHttpRequest.httpVersion;
-	else
-		return EMPTY_STRING;
-}
-
-std::string_view HttpRequestsParser::getValueOfHeaderOfRequest(const std::string_view& keyOfHeaderOfRequest)
+std::string_view HttpRequestsParser::getValueOfHeader(std::string_view keyOfHeaderOfRequest)
 {
 	if (isRequestSuccessfullyParsed())
 		if(m_parsedHttpRequest.requestHeaders.find(keyOfHeaderOfRequest)
@@ -91,24 +76,36 @@ bool HttpRequestsParser::parse(std::string&& httpRequest)
 			endOfCheckedSubstring < m_rawHttpRequest.size();
 			++endOfCheckedSubstring)
 		{
+			if (!isValidCharacter(m_rawHttpRequest.at(endOfCheckedSubstring)))
+			{
+				m_parsingState = ParsingState::notParsed;
+				return isSuccessfullyParsed;
+			}
+
 			switch (m_parsingState)
 			{
 
 			case ParsingState::httpRequestTypeSearch:
 			{
+				if (isControlCharacter(m_rawHttpRequest.at(endOfCheckedSubstring)))
+				{
+					m_parsingState = ParsingState::notParsed;
+					return isSuccessfullyParsed;
+				}
+
 				if (m_rawHttpRequest.at(endOfCheckedSubstring) == WHITESPACE)
 				{
-					std::string_view assumedHttpRequestType{ 
+					std::string_view assumedHttpMethod{ 
 						getSubstringOfRequest(startOfCheckedSubstring, endOfCheckedSubstring) };
 
-					if(m_knownHttpRequestTypes.find(assumedHttpRequestType) 
-						== m_knownHttpRequestTypes.end())
+					if(KNOWN_HTTP_METHODS.find(assumedHttpMethod)
+						== KNOWN_HTTP_METHODS.end())
 					{
 						m_parsingState = ParsingState::notParsed;
 						return isSuccessfullyParsed;
 					}
 
-					m_parsedHttpRequest.type = m_knownHttpRequestTypes.at(assumedHttpRequestType);
+					m_parsedHttpRequest.httpMethod = KNOWN_HTTP_METHODS.at(assumedHttpMethod);
 					m_parsingState = ParsingState::urlSearch;
 
 					startOfCheckedSubstring = endOfCheckedSubstring + 1;
@@ -119,16 +116,16 @@ bool HttpRequestsParser::parse(std::string&& httpRequest)
 
 			case ParsingState::urlSearch:
 			{
+				if (isControlCharacter(m_rawHttpRequest.at(endOfCheckedSubstring)))
+				{
+					m_parsingState = ParsingState::notParsed;
+					return isSuccessfullyParsed;
+				}
+
 				if (m_rawHttpRequest.at(endOfCheckedSubstring) == WHITESPACE)
 				{
 					std::string_view assumedUrl{
 						getSubstringOfRequest(startOfCheckedSubstring, endOfCheckedSubstring) };
-
-					if (!checkStringIsFromPrintableCharacters(assumedUrl))
-					{
-						m_parsingState = ParsingState::notParsed;
-						return isSuccessfullyParsed;
-					}
 
 					m_parsedHttpRequest.url = assumedUrl;
 					m_parsingState = ParsingState::httpVersionSearch;
@@ -143,20 +140,15 @@ bool HttpRequestsParser::parse(std::string&& httpRequest)
 			{
 				if(checkEndOfLineInRequest(endOfCheckedSubstring))
 				{
-					std::string_view assumedHttpVersion{
-						getSubstringOfRequest(startOfCheckedSubstring, endOfCheckedSubstring) };
-
-					if (!checkStringIsFromPrintableCharacters(assumedHttpVersion))
-					{
-						m_parsingState = ParsingState::notParsed;
-						return isSuccessfullyParsed;
-					}
-
-					m_parsedHttpRequest.httpVersion = assumedHttpVersion;
 					m_parsingState = ParsingState::httpRequestHeadersSearch;
 
 					startOfCheckedSubstring = endOfCheckedSubstring + 2;
 					++endOfCheckedSubstring;
+				}
+				else if (isControlCharacter(m_rawHttpRequest.at(endOfCheckedSubstring)))
+				{
+					m_parsingState = ParsingState::notParsed;
+					return isSuccessfullyParsed;
 				}
 				else
 					continue;
@@ -171,8 +163,6 @@ bool HttpRequestsParser::parse(std::string&& httpRequest)
 					while (m_rawHttpRequest.at(currentHeaderRequestPointer) != COLON)
 					{
 						if (currentHeaderRequestPointer == endOfCheckedSubstring
-							|| !isValidCharacter(m_rawHttpRequest.at(currentHeaderRequestPointer))
-							|| isControlCharacter(m_rawHttpRequest.at(currentHeaderRequestPointer))
 							|| isSpecialCharacter(m_rawHttpRequest.at(currentHeaderRequestPointer)))
 						{
 							m_parsingState = ParsingState::notParsed;
@@ -182,21 +172,17 @@ bool HttpRequestsParser::parse(std::string&& httpRequest)
 						++currentHeaderRequestPointer;
 					}
 
-					std::string_view headerValue{
-						getSubstringOfRequest(currentHeaderRequestPointer + 2, endOfCheckedSubstring) };
-
-					if (!checkStringIsFromPrintableCharacters(headerValue))
-					{
-						m_parsingState = ParsingState::notParsed;
-						return isSuccessfullyParsed;
-					}
-
 					m_parsedHttpRequest.requestHeaders[
 						getSubstringOfRequest(startOfCheckedSubstring, currentHeaderRequestPointer) ]
-						= headerValue;
+						= getSubstringOfRequest(currentHeaderRequestPointer + 2, endOfCheckedSubstring);
 
 					startOfCheckedSubstring = endOfCheckedSubstring + 2;
 					++endOfCheckedSubstring;
+				}
+				else if (isControlCharacter(m_rawHttpRequest.at(endOfCheckedSubstring)))
+				{
+					m_parsingState = ParsingState::notParsed;
+					return isSuccessfullyParsed;
 				}
 				else
 					continue;
@@ -225,18 +211,6 @@ bool HttpRequestsParser::checkEndOfLineInRequest(size_t stringCharacterIndex)
 		return true;
 	else
 		return false;
-}
-
-bool HttpRequestsParser::checkStringIsFromPrintableCharacters(std::string_view stringToTest)
-{
-	for (const auto& character : stringToTest)
-	{
-		if (!isValidCharacter(character)
-			|| isControlCharacter(character))
-			return false;
-	}
-
-	return true;
 }
 
 

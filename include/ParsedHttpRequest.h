@@ -40,6 +40,10 @@ namespace
 	constexpr uint8_t COLON{ ':' };
 	constexpr uint8_t CARRIAGE_RETURN{ '\r' };
 	constexpr uint8_t LINE_FEED{ '\n' };
+
+	constexpr uint8_t UPPER_A_CHARACTER{ 'A' };
+	constexpr uint8_t UPPER_Z_CHARACTER{ 'Z' };
+	constexpr uint8_t UPPER_TO_LOWER_CASE_SHIFT{ 32 };
 }
 
 struct ParsedHttpRequest

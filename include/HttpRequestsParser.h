@@ -31,7 +31,7 @@ public:
 	bool isRequestSuccessfullyParsed();
 	HttpMethods getHttpMethod();
 	std::string_view getUrl();
-	std::string_view getValueOfHeader(std::string_view keyOfHeaderOfRequest);
+	std::string_view getValueOfHeader(std::string&& keyOfHeaderOfRequest);
 
 	bool parse(std::string&& httpRequest);
 
@@ -39,6 +39,8 @@ private:
 	std::string_view getSubstringOfRequest(size_t begin, size_t end);
 
 	bool checkEndOfLineInRequest(size_t stringCharacterIndex);
+	char lowCharacterCaseInRequest(char character);
+
 	bool isValidCharacter(char character);
 	bool isControlCharacter(char character);
 	bool isSpecialCharacter(char character);

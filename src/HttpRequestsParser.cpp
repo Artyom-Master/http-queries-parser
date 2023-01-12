@@ -51,12 +51,19 @@ std::string_view HttpRequestsParser::getUrl()
 		return EMPTY_STRING;
 }
 
-std::string_view HttpRequestsParser::getValueOfHeader(std::string_view keyOfHeaderOfRequest)
+std::string_view HttpRequestsParser::getValueOfHeader(std::string&& keyOfHeaderOfRequest)
 {
 	if (isRequestSuccessfullyParsed())
-		if(m_parsedHttpRequest.requestHeaders.find(keyOfHeaderOfRequest)
+	{
+		std::string keyToSearch{ std::move(keyOfHeaderOfRequest) };
+
+		for (int index{ 0 }; index < keyToSearch.size(); ++index)
+			keyToSearch[index] = lowCharacterCaseInRequest(keyToSearch.at(index));
+
+		if (m_parsedHttpRequest.requestHeaders.find(keyToSearch)
 			!= m_parsedHttpRequest.requestHeaders.end())
-		return m_parsedHttpRequest.requestHeaders.at(keyOfHeaderOfRequest);
+			return m_parsedHttpRequest.requestHeaders.at(keyToSearch);
+	}
 
 	return EMPTY_STRING;
 }
@@ -169,6 +176,9 @@ bool HttpRequestsParser::parse(std::string&& httpRequest)
 							return isSuccessfullyParsed;
 						}
 
+						m_rawHttpRequest[currentHeaderRequestPointer] =
+							lowCharacterCaseInRequest(m_rawHttpRequest.at(currentHeaderRequestPointer));
+
 						++currentHeaderRequestPointer;
 					}
 
@@ -211,6 +221,14 @@ bool HttpRequestsParser::checkEndOfLineInRequest(size_t stringCharacterIndex)
 		return true;
 	else
 		return false;
+}
+
+char HttpRequestsParser::lowCharacterCaseInRequest(char character) {
+	if (character >= UPPER_A_CHARACTER
+		&& character <= UPPER_Z_CHARACTER)
+		return character + UPPER_TO_LOWER_CASE_SHIFT;
+	else
+		return character;
 }
 
 

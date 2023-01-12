@@ -35,7 +35,7 @@ void printParsedHttpRequest(const std::unique_ptr<HttpRequestsParser>& httpQueri
     }
 
     std::cout << "URL: " << httpQueriesParser->getUrl() << "\n";
-    std::cout << "Host: " << httpQueriesParser->getValueOfHeader("Host") << "\n";
+    std::cout << "Host: " << httpQueriesParser->getValueOfHeader("hOST") << "\n";
     std::cout << "User-Agent: " << httpQueriesParser->getValueOfHeader("User-Agent") << "\n";
     std::cout << "Accept: " << httpQueriesParser->getValueOfHeader("Accept") << "\n";
     std::cout << "Connection: " << httpQueriesParser->getValueOfHeader("Connection") << "\n";

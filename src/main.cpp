@@ -74,7 +74,7 @@ int main()
 
 
     std::string secondRequest{ "POST /path/to/sit(@&*%9jvcsal=sdv=s asfgasxcv&(#@$%H9j9\r\n"
-            "ACCEPT: text/html\r\n"
+            "ACCEPT text/html\r\n"
             "Connection: close\r\n"
             "\r\n"
             "some data oajgop$&(**&mv\n\t\r\b" };

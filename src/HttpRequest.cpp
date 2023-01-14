@@ -1,5 +1,4 @@
 #include "HttpRequest.h"
-#include <iostream>
 
 HttpRequest::HttpRequest()
 	: m_rawHttpRequest{}
@@ -8,7 +7,7 @@ HttpRequest::HttpRequest()
 	, m_requestHeaders{}
 	, m_valid{ false }
 {
-	std::cout << "\nCall HttpRequest default constructor\n";
+	
 }
 
 HttpRequest::~HttpRequest()
@@ -16,8 +15,6 @@ HttpRequest::~HttpRequest()
 	m_requestHeaders.clear();
 	m_rawHttpRequest.clear();
 	m_rawHttpRequest.shrink_to_fit();
-
-	std::cout << "\nCall HttpRequest destructor\n";
 }
 
 
@@ -28,7 +25,7 @@ HttpRequest::HttpRequest(const HttpRequest& other)
 	, m_requestHeaders{ other.m_requestHeaders }
 	, m_valid{ other.m_valid }
 {
-	std::cout << "\nCall HttpRequest copy constructor\n";
+	
 }
 
 HttpRequest& HttpRequest::operator=(const HttpRequest& other)
@@ -38,8 +35,6 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& other)
 	m_url = other.m_url;
 	m_requestHeaders = other.m_requestHeaders;
 	m_valid = other.m_valid;
-
-	std::cout << "\nCall HttpRequest copy operator\n";
 
 	return *this;
 }
@@ -52,7 +47,7 @@ HttpRequest::HttpRequest(HttpRequest&& other) noexcept
 	, m_requestHeaders{ std::move(other.m_requestHeaders) }
 	, m_valid{ std::exchange(other.m_valid, false) }
 {
-	std::cout << "\Call HttpRequest move constructor\n";
+	
 }
 
 HttpRequest& HttpRequest::operator=(HttpRequest&& other) noexcept
@@ -62,8 +57,6 @@ HttpRequest& HttpRequest::operator=(HttpRequest&& other) noexcept
 	m_url = std::exchange(other.m_url, {});
 	m_requestHeaders = std::move(other.m_requestHeaders);
 	m_valid = std::exchange(other.m_valid, false);
-
-	std::cout << "\Call HttpRequest move operator\n";
 
 	return *this;
 }

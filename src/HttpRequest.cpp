@@ -62,12 +62,12 @@ HttpRequest& HttpRequest::operator=(HttpRequest&& other) noexcept
 }
 
 
-bool HttpRequest::isValid()
+bool HttpRequest::isValid() const
 {
 	return m_valid;
 }
 
-HttpMethods HttpRequest::getHttpMethod()
+HttpMethods HttpRequest::getHttpMethod() const
 {
 	if (m_valid)
 		return m_httpMethod;
@@ -75,7 +75,7 @@ HttpMethods HttpRequest::getHttpMethod()
 		return HttpMethods::unknown;
 }
 
-std::string_view HttpRequest::getUrl()
+std::string_view HttpRequest::getUrl() const
 {
 	if (m_valid)
 		return m_url;
@@ -83,7 +83,7 @@ std::string_view HttpRequest::getUrl()
 		return {};
 }
 
-std::string_view HttpRequest::getValueOfHeader(std::string&& keyOfHeaderOfRequest)
+std::string_view HttpRequest::getValueOfHeader(std::string&& keyOfHeaderOfRequest) const
 {
 	if (m_valid)
 	{
@@ -102,8 +102,8 @@ std::string_view HttpRequest::getValueOfHeader(std::string&& keyOfHeaderOfReques
 		return {};
 }
 
-std::unordered_map<std::string_view, std::string_view>::iterator
-HttpRequest::getBeginOfHeaders()
+std::unordered_map<std::string_view, std::string_view>::const_iterator
+HttpRequest::getBeginOfHeaders() const
 {
 	if (m_valid)
 		return m_requestHeaders.begin();
@@ -111,8 +111,8 @@ HttpRequest::getBeginOfHeaders()
 		return getEndOfHeaders();
 }
 
-std::unordered_map<std::string_view, std::string_view>::iterator
-HttpRequest::getEndOfHeaders()
+std::unordered_map<std::string_view, std::string_view>::const_iterator
+HttpRequest::getEndOfHeaders() const
 {
 	return m_requestHeaders.end();
 }

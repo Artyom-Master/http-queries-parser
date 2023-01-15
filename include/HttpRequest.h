@@ -32,13 +32,15 @@ public:
 	HttpRequest(HttpRequest&& other) noexcept;
 	HttpRequest& operator=(HttpRequest&& other) noexcept;
 
-	bool isValid();
-	HttpMethods getHttpMethod();
-	std::string_view getUrl();
-	std::string_view getValueOfHeader(std::string&& keyOfHeaderOfRequest);
+	bool isValid() const;
+	HttpMethods getHttpMethod() const;
+	std::string_view getUrl() const;
+	std::string_view getValueOfHeader(std::string&& keyOfHeaderOfRequest) const;
 
-	std::unordered_map<std::string_view, std::string_view>::iterator getBeginOfHeaders();
-	std::unordered_map<std::string_view, std::string_view>::iterator getEndOfHeaders();
+	std::unordered_map<std::string_view, std::string_view>::const_iterator 
+		getBeginOfHeaders() const;
+	std::unordered_map<std::string_view, std::string_view>::const_iterator 
+		getEndOfHeaders() const;
 
 	friend class HttpRequestsParser;
 };

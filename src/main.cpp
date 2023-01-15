@@ -2,7 +2,7 @@
 
 #include "HttpRequestsParser.h"
 
-void printParsedHttpRequest(HttpRequest& httpRequest)
+void printParsedHttpRequest(const HttpRequest& httpRequest)
 {
     std::cout << "HTTP method of request: ";
 

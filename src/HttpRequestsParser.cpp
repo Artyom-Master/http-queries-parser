@@ -7,7 +7,7 @@ HttpRequestsParser::HttpRequestsParser()
 }
 
 
-bool HttpRequestsParser::isWorking()
+bool HttpRequestsParser::isWorking() const
 {
 	if (m_parsingState == ParsingState::idle)
 		return false;

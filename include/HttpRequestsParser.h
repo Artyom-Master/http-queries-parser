@@ -14,17 +14,17 @@ namespace
 
 	constexpr char STRING_END{ '\0' };
 
-	constexpr std::pair<uint8_t, uint8_t> BOUNDARY_CODES_OF_ASCII_TABLE{ 0, 127 };
-	constexpr std::pair<uint8_t, uint8_t> BOUNDARIES_OF_UPPER_CASE_LETTERS{ 'A', 'Z' };
-	constexpr std::pair<uint8_t, uint8_t> BOUNDARIES_OF_LOWER_CASE_LETTERS{ 'a', 'z' };
+	constexpr std::pair<char, char> BOUNDARY_CODES_OF_ASCII_TABLE{ 0, 127 };
+	constexpr std::pair<char, char> BOUNDARIES_OF_UPPER_CASE_LETTERS{ 'A', 'Z' };
+	constexpr std::pair<char, char> BOUNDARIES_OF_LOWER_CASE_LETTERS{ 'a', 'z' };
 
-	constexpr uint8_t HYPHEN{ '-' };
-	constexpr uint8_t WHITESPACE{ ' ' };
-	constexpr uint8_t COLON{ ':' };
-	constexpr uint8_t CARRIAGE_RETURN{ '\r' };
-	constexpr uint8_t LINE_FEED{ '\n' };
+	constexpr char HYPHEN{ '-' };
+	constexpr char WHITESPACE{ ' ' };
+	constexpr char COLON{ ':' };
+	constexpr char CARRIAGE_RETURN{ '\r' };
+	constexpr char LINE_FEED{ '\n' };
 
-	constexpr uint8_t LAST_CONTROL_CHARACTER_OF_ASCII_TABLE{ 31 };
+	constexpr char LAST_CONTROL_CHARACTER_OF_ASCII_TABLE{ 31 };
 }
 
 class HttpRequestsParser
@@ -50,7 +50,7 @@ public:
 	HttpRequestsParser(HttpRequestsParser&& other) noexcept = delete;
 	HttpRequestsParser& operator=(HttpRequestsParser&& other) noexcept = delete;
 
-	bool isWorking();
+	bool isWorking() const;
 	HttpRequest parse(std::string&& httpRequest);
 
 private:

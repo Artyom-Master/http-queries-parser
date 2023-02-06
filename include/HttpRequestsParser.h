@@ -50,17 +50,17 @@ public:
 	HttpRequestsParser(HttpRequestsParser&& other) noexcept = delete;
 	HttpRequestsParser& operator=(HttpRequestsParser&& other) noexcept = delete;
 
-	bool isWorking() const;
+	inline bool isWorking() const { return m_parsingState != ParsingState::idle; }
 	HttpRequest parse(std::string&& httpRequest);
 
 private:
-	std::string_view getSubstringOfRequest(const HttpRequest& request, 
-		size_t begin, size_t end);
-	bool checkEndOfLineInRequest(const HttpRequest& request, 
-		size_t stringCharacterIndex);
+	inline std::string_view getSubstringOfRequest(const HttpRequest& request,
+		size_t begin, size_t end) const;
+	inline bool checkEndOfLineInRequest(const HttpRequest& request,
+		size_t stringCharacterIndex) const;
 	
-	bool isValidCharacter(char character);
-	bool isControlCharacter(char character);
-	bool isCharacterIsLetterOrHyphen(char character);
+	inline bool isValidCharacter(char character) const;
+	inline bool isControlCharacter(char character) const;
+	inline bool isCharacterIsLetterOrHyphen(char character) const;
 };
 

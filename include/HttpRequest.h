@@ -1,12 +1,11 @@
 #pragma once
 
-#include <cstdint>
 #include <string>
 #include <unordered_map>
 
 enum class HttpMethods : uint8_t
 {
-	unknown,
+	invalid,
 	get,
 	post,
 	connect,
@@ -20,7 +19,6 @@ class HttpRequest
 	HttpMethods m_httpMethod;
 	std::string_view m_url;
 	std::unordered_map<std::string_view, std::string_view> m_requestHeaders;
-	bool m_valid;
 
 public:
 	HttpRequest();
@@ -32,15 +30,13 @@ public:
 	HttpRequest(HttpRequest&& other) noexcept;
 	HttpRequest& operator=(HttpRequest&& other) noexcept;
 
-	bool isValid() const;
-	HttpMethods getHttpMethod() const;
-	std::string_view getUrl() const;
+	inline bool isValid() const { return m_httpMethod != HttpMethods::invalid; }
+	inline HttpMethods getHttpMethod() const { return m_httpMethod; }
+	inline std::string_view getUrl() const { return m_url; }
 	std::string_view getValueOfHeader(std::string&& keyOfHeaderOfRequest) const;
 
-	std::unordered_map<std::string_view, std::string_view>::const_iterator 
-		getBeginOfHeaders() const;
-	std::unordered_map<std::string_view, std::string_view>::const_iterator 
-		getEndOfHeaders() const;
+	inline auto getBeginOfHeaders() const { return m_requestHeaders.begin(); }
+	inline auto	getEndOfHeaders() const { return m_requestHeaders.end(); }
 
 	friend class HttpRequestsParser;
 };

@@ -7,14 +7,6 @@ HttpRequestsParser::HttpRequestsParser()
 }
 
 
-bool HttpRequestsParser::isWorking() const
-{
-	if (m_parsingState == ParsingState::idle)
-		return false;
-	else
-		return true;
-}
-
 HttpRequest HttpRequestsParser::parse(std::string&& httpRequest)
 {
 	if (httpRequest.size() > 1)
@@ -24,7 +16,7 @@ HttpRequest HttpRequestsParser::parse(std::string&& httpRequest)
 		size_t startOfCheckedSubstring{ 0 };
 		m_parsingState = ParsingState::httpRequestTypeSearch;
 
-		for(size_t endOfCheckedSubstring{ 1 };
+		for(size_t endOfCheckedSubstring{ 0 };
 			endOfCheckedSubstring < parsedRequest.m_rawHttpRequest.size();
 			++endOfCheckedSubstring)
 		{
@@ -138,7 +130,6 @@ HttpRequest HttpRequestsParser::parse(std::string&& httpRequest)
 						&& checkEndOfLineInRequest(parsedRequest, endOfCheckedSubstring + 1))
 					{
 						m_parsingState = ParsingState::idle;
-						parsedRequest.m_valid = true;
 						return parsedRequest;
 					}
 				}
@@ -155,7 +146,6 @@ HttpRequest HttpRequestsParser::parse(std::string&& httpRequest)
 		}
 
 		m_parsingState = ParsingState::idle;
-		parsedRequest.m_valid = true;
 		return parsedRequest;
 	}
 	else
@@ -163,31 +153,28 @@ HttpRequest HttpRequestsParser::parse(std::string&& httpRequest)
 }
 
 
-std::string_view HttpRequestsParser::getSubstringOfRequest(const HttpRequest& request, 
-	size_t begin, size_t end)
+inline std::string_view HttpRequestsParser::getSubstringOfRequest(const HttpRequest& request,
+	size_t begin, size_t end) const
 {
 	return std::string_view(request.m_rawHttpRequest).substr(begin, end - begin);
 }
 
 
-bool HttpRequestsParser::checkEndOfLineInRequest(const HttpRequest& request, 
-	size_t stringCharacterIndex)
+inline bool HttpRequestsParser::checkEndOfLineInRequest(const HttpRequest& request,
+	size_t stringCharacterIndex) const
 {
-	if ((request.m_rawHttpRequest.at(stringCharacterIndex) == CARRIAGE_RETURN
-		&& request.m_rawHttpRequest.at(stringCharacterIndex + 1) == LINE_FEED))
-		return true;
-	else
-		return false;
+	return ((request.m_rawHttpRequest.at(stringCharacterIndex) == CARRIAGE_RETURN
+		&& request.m_rawHttpRequest.at(stringCharacterIndex + 1) == LINE_FEED));
 }
 
 
-bool HttpRequestsParser::isValidCharacter(char character)
+inline bool HttpRequestsParser::isValidCharacter(char character) const
 {
 	return (character >= BOUNDARY_CODES_OF_ASCII_TABLE.first
 		&& character <= BOUNDARY_CODES_OF_ASCII_TABLE.second);
 }
 
-bool HttpRequestsParser::isControlCharacter(char character)
+inline bool HttpRequestsParser::isControlCharacter(char character) const
 {
 	return (character >= BOUNDARY_CODES_OF_ASCII_TABLE.first
 		&& character <= LAST_CONTROL_CHARACTER_OF_ASCII_TABLE)
@@ -195,7 +182,7 @@ bool HttpRequestsParser::isControlCharacter(char character)
 		|| character == BOUNDARY_CODES_OF_ASCII_TABLE.second;
 }
 
-bool HttpRequestsParser::isCharacterIsLetterOrHyphen(char character)
+inline bool HttpRequestsParser::isCharacterIsLetterOrHyphen(char character) const
 {
 	return (character >= BOUNDARIES_OF_UPPER_CASE_LETTERS.first
 		&& character <= BOUNDARIES_OF_UPPER_CASE_LETTERS.second)

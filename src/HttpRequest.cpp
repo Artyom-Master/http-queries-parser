@@ -2,10 +2,9 @@
 
 HttpRequest::HttpRequest()
 	: m_rawHttpRequest{}
-	, m_httpMethod{ HttpMethods::unknown }
+	, m_httpMethod{ HttpMethods::invalid }
 	, m_url{}
 	, m_requestHeaders{}
-	, m_valid{ false }
 {
 	
 }
@@ -23,7 +22,6 @@ HttpRequest::HttpRequest(const HttpRequest& other)
 	, m_httpMethod{ other.m_httpMethod }
 	, m_url{ other.m_url }
 	, m_requestHeaders{ other.m_requestHeaders }
-	, m_valid{ other.m_valid }
 {
 	
 }
@@ -34,7 +32,6 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& other)
 	m_httpMethod = other.m_httpMethod;
 	m_url = other.m_url;
 	m_requestHeaders = other.m_requestHeaders;
-	m_valid = other.m_valid;
 
 	return *this;
 }
@@ -42,10 +39,9 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& other)
 
 HttpRequest::HttpRequest(HttpRequest&& other) noexcept
 	: m_rawHttpRequest{ std::move(other.m_rawHttpRequest) }
-	, m_httpMethod{ std::exchange(other.m_httpMethod, HttpMethods::unknown) }
+	, m_httpMethod{ std::exchange(other.m_httpMethod, HttpMethods::invalid) }
 	, m_url{ std::exchange(other.m_url, {}) }
 	, m_requestHeaders{ std::move(other.m_requestHeaders) }
-	, m_valid{ std::exchange(other.m_valid, false) }
 {
 	
 }
@@ -53,66 +49,28 @@ HttpRequest::HttpRequest(HttpRequest&& other) noexcept
 HttpRequest& HttpRequest::operator=(HttpRequest&& other) noexcept
 {
 	m_rawHttpRequest = std::move(other.m_rawHttpRequest);
-	m_httpMethod = std::exchange(other.m_httpMethod, HttpMethods::unknown);
+	m_httpMethod = std::exchange(other.m_httpMethod, HttpMethods::invalid);
 	m_url = std::exchange(other.m_url, {});
 	m_requestHeaders = std::move(other.m_requestHeaders);
-	m_valid = std::exchange(other.m_valid, false);
 
 	return *this;
 }
 
 
-bool HttpRequest::isValid() const
+ std::string_view HttpRequest::getValueOfHeader(std::string&& keyOfHeaderOfRequest) const
 {
-	return m_valid;
-}
-
-HttpMethods HttpRequest::getHttpMethod() const
-{
-	if (m_valid)
-		return m_httpMethod;
-	else
-		return HttpMethods::unknown;
-}
-
-std::string_view HttpRequest::getUrl() const
-{
-	if (m_valid)
-		return m_url;
-	else
-		return {};
-}
-
-std::string_view HttpRequest::getValueOfHeader(std::string&& keyOfHeaderOfRequest) const
-{
-	if (m_valid)
+	if (!m_requestHeaders.empty())
 	{
 		std::string keyToSearch{ std::move(keyOfHeaderOfRequest) };
 
-		for (int index{ 0 }; index < keyToSearch.size(); ++index)
+		for (size_t index{ 0 }; index < keyToSearch.size(); ++index)
 			keyToSearch[index] = std::tolower(keyToSearch.at(index));
 
-		if (m_requestHeaders.find(keyToSearch)
-			!= m_requestHeaders.end())
-			return m_requestHeaders.at(keyToSearch);
-		else
-			return {};
+		auto valuePointer{ m_requestHeaders.find(keyToSearch) };
+
+		if (valuePointer != m_requestHeaders.end())
+			return valuePointer->second;
 	}
-	else
-		return {};
-}
 
-std::unordered_map<std::string_view, std::string_view>::const_iterator
-HttpRequest::getBeginOfHeaders() const
-{
-	if (m_valid)
-		return m_requestHeaders.begin();
-	else
-		return getEndOfHeaders();
-}
-
-std::unordered_map<std::string_view, std::string_view>::const_iterator
-HttpRequest::getEndOfHeaders() const
-{
-	return m_requestHeaders.end();
+	return {};
 }

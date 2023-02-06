@@ -28,9 +28,9 @@ void printParsedHttpRequest(const HttpRequest& httpRequest)
     {
         std::cout << "POST\n";
     }break;
-    case HttpMethods::unknown:
+    case HttpMethods::invalid:
     {
-        std::cout << "UNKNOWN\n";
+        std::cout << "INVALID\n";
     }break;
     }
 
@@ -73,9 +73,9 @@ int main()
     std::cout << "\n\n\n";
 
 
-    std::string secondRequest{ "POST /path/to/sit(@&*%9jvcsal=sdv=s asfgasxcv&(#@$%H9j9\r\n"
-            "ACCEPT text/html\r\n"
-            "Connection: close\r\n"
+    std::string secondRequest{ "POSTA /path/to/sit(@&*%9jvcsal=sdv=s asfgasxcv&(#@$%H9j9\r\n"
+            "ACCEPT: text/html\r\n"
+            "Connection close\r\n"
             "\r\n"
             "some data oajgop$&(**&mv\n\t\r\b" };
 

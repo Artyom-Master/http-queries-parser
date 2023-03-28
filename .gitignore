@@ -1,11 +1,11 @@
 #Ignore VS generated directories
-/.vs
-/packages
+.vs/
+packages/
 
 #Ignore output directories
-/HttpRequestsParser/x64
-/Tests/x64
+HttpRequestsParser/x64/
+Tests/x64/
 
 #Ignore VS generated files
-/HttpRequestsParser/*.user
-/Tests/*.user
+HttpRequestsParser/*.user
+Tests/*.user

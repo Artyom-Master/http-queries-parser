@@ -1,4 +1,0 @@
-D:\http-requests-parser\Tests\x64\Release\Tests.vcxproj.CopyComplete
-D:\http-requests-parser\Tests\x64\Release\Tests.exe
-D:\http-requests-parser\Tests\x64\Release\gtest.pdb
-D:\http-requests-parser\Tests\x64\Release\gtest_main.pdb

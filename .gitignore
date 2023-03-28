@@ -1,9 +1,8 @@
 #Ignore output directories
-/Debug
-/Release
+/HttpRequestsParser/x64
 
-#Ignore some VS generated directories
+#Ignore VS generated directories
 /.vs
 
-#Ignore some VS generated files
-*.user
+#Ignore VS generated files
+/HttpRequestsParser/*.user
